@@ -159,14 +159,26 @@ const BrosurDigitalForm: React.FC = () => {
       const element = brosurRef.current;
       
       const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
         logging: false,
         backgroundColor: "#ffffff",
-        allowTaint: true,
+        allowTaint: false,
         removeContainer: true,
-        imageTimeout: 15000,
+        imageTimeout: 30000,
+        foreignObjectRendering: false,
         onclone: (_clonedDoc, clonedElement) => {
+          clonedElement.style.width = "210mm";
+          clonedElement.style.minHeight = "297mm";
+          clonedElement.style.maxHeight = "297mm";
+          clonedElement.style.overflow = "hidden";
+          
+          const images = clonedElement.querySelectorAll('img');
+          images.forEach((img) => {
+            img.crossOrigin = "anonymous";
+            img.style.imageRendering = "auto";
+          });
+          
           const allElements = clonedElement.querySelectorAll('*');
           allElements.forEach((el) => {
             const htmlEl = el as HTMLElement;
@@ -176,6 +188,8 @@ const BrosurDigitalForm: React.FC = () => {
             const bgColor = styles.backgroundColor;
             const borderColor = styles.borderColor;
             const boxShadow = styles.boxShadow;
+            const outlineColor = styles.outlineColor;
+            const caretColor = styles.caretColor;
             
             if (color) {
               htmlEl.style.color = convertColorToRgb(color);
@@ -189,16 +203,32 @@ const BrosurDigitalForm: React.FC = () => {
             if (boxShadow && boxShadow !== 'none') {
               htmlEl.style.boxShadow = convertBoxShadow(boxShadow);
             }
+            if (outlineColor) {
+              htmlEl.style.outlineColor = convertColorToRgb(outlineColor);
+            }
+            if (caretColor && caretColor !== 'auto') {
+              htmlEl.style.caretColor = convertColorToRgb(caretColor);
+            }
+            
+            const bgImage = styles.backgroundImage;
+            if (bgImage && bgImage.includes('gradient')) {
+              const convertedGradient = bgImage.replace(
+                /(oklab|oklch|lab|lch|color)\([^)]+\)/gi,
+                (match) => convertColorToRgb(match)
+              );
+              htmlEl.style.backgroundImage = convertedGradient;
+            }
           });
         },
       });
       
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const imgData = canvas.toDataURL("image/png", 1.0);
       
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
         format: "a4",
+        compress: true,
       });
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -206,31 +236,29 @@ const BrosurDigitalForm: React.FC = () => {
       
       const imgWidth = canvas.width;
       const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      
+      const widthRatio = pdfWidth / imgWidth;
+      const heightRatio = pdfHeight / imgHeight;
+      const ratio = Math.min(widthRatio, heightRatio);
+      
       const scaledWidth = imgWidth * ratio;
       const scaledHeight = imgHeight * ratio;
       
       const x = (pdfWidth - scaledWidth) / 2;
-      const y = 0;
+      const y = (pdfHeight - scaledHeight) / 2;
       
-      pdf.addImage(imgData, "JPEG", x, y, scaledWidth, scaledHeight);
+      pdf.addImage(imgData, "PNG", x, y, scaledWidth, scaledHeight, undefined, "FAST");
       
       const clientName = clientInfo.companyName || "Klien";
-      const fileName = `Brosur-Website-Sekolah-${clientName.replace(/\s+/g, "-")}.pdf`;
+      const sanitizedName = clientName.replace(/[^a-zA-Z0-9\s-]/g, "").replace(/\s+/g, "-");
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const fileName = `Brosur-Website-${sanitizedName}-${timestamp}.pdf`;
       
-      const pdfBlob = pdf.output('blob');
-      const blobUrl = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+      pdf.save(fileName);
       
     } catch (error) {
       console.error("Error generating PDF:", error);
+      alert("Gagal membuat PDF. Silakan coba lagi.");
     } finally {
       setIsGenerating(false);
     }
