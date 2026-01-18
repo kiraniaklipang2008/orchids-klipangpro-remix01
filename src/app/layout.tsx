@@ -1,42 +1,18 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { VisualEditsMessenger } from "orchids-visual-edits";
-import ErrorReporter from "@/components/ErrorReporter";
-import Script from "next/script";
+import './globals.css';
+import { ReactNode } from 'react';
+import Script from 'next/script';
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
-
-export const metadata: Metadata = {
-  title: "Invoice & Surat Penawaran Maker",
-  description: "Professional invoice and quotation generator by Semesta Tekno",
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className="antialiased">
-        <ErrorReporter />
+      <body>
         <Script
-          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/scripts//route-messenger.js"
+          id="orchids-browser-logs"
+          src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/scripts/orchids-browser-logs.js"
           strategy="afterInteractive"
-          data-target-origin="*"
-          data-message-type="ROUTE_CHANGE"
-          data-include-search-params="true"
-          data-only-in-iframe="true"
-          data-debug="true"
-          data-custom-data='{"appName": "YourApp", "version": "1.0.0", "greeting": "hi"}'
+          data-orchids-project-id="75e11cd8-86c5-4809-a48f-01be02b62726"
         />
         {children}
-        <VisualEditsMessenger />
       </body>
     </html>
   );
