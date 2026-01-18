@@ -479,13 +479,29 @@ const BrosurDigitalForm: React.FC = () => {
           )}
         </div>
 
-        <div className="p-4">
-          <div className="text-center mb-3">
-            <h2 className="text-base font-bold text-[#0f172a] flex items-center justify-center gap-1.5">
-              <Star size={16} className="text-[#8b5cf6]" />
-              Pilihan Paket Website
-            </h2>
+          <div className="relative" style={{ height: "320px", overflow: "hidden" }}>
+            <Image
+              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/project-uploads/75e11cd8-86c5-4809-a48f-01be02b62726/image-1768746935855.png?width=8000&height=8000&resize=contain"
+              alt="Web Development Illustration"
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/20" />
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+              <div className="bg-[#8b5cf6] px-6 py-2 rounded-full shadow-lg shadow-purple-500/30">
+                <span className="text-white font-bold text-sm tracking-wide">PROMO JASA WEBSITE 2026</span>
+              </div>
+            </div>
           </div>
+
+          <div className="p-4">
+            <div className="text-center mb-3">
+              <h2 className="text-base font-bold text-[#0f172a] flex items-center justify-center gap-1.5">
+                <Star size={16} className="text-[#8b5cf6]" />
+                Pilihan Paket Website
+              </h2>
+            </div>
 
           <div className="grid grid-cols-3 gap-3">
             {packages.map((pkg) => (
